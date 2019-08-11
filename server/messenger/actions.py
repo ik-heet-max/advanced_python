@@ -1,4 +1,4 @@
-from .controllers import get_echo
+from .controllers import send_message
 
 
 actionnames = [

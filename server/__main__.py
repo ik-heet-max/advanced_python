@@ -3,6 +3,7 @@ import socket
 from argparse import ArgumentParser
 import json
 from protocol import validate_request, make_response
+from actions import resolve
 
 parser = ArgumentParser()
 
@@ -40,8 +41,18 @@ try:
         b_request = client.recv(config.get('buffersize'))
         request = json.loads(b_request.decode())
         if validate_request(request):
-            print('client has sent data {}'.format(rqueste))
-            response = make_response(request, 200, data=request.get('data'))
+            actions_name = request.get('action')
+            controller = resolve(actions_name)
+            if controller:
+                try:
+                    print('client has sent data {}'.format(request))
+                    response = controller(request)
+                except Exception as err:
+                    print('Internal server error: {}'.format(err))
+                    response = make_response(request, 500, data='Internal server error')
+            else:
+                print('Controller {} does not exist'.format(actions_name))
+                response = make_response(request, 404, 'Action not found')
         else:
             print('Client has sent an invalid request {}'.format(request))
             response = make_response(request, 404, 'Wrong request')
