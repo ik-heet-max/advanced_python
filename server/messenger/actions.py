@@ -1,4 +1,4 @@
-from .controllers import send_message
+from messenger.controllers import send_message
 
 
 actionnames = [
