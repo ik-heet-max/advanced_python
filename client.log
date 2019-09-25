@@ -1,0 +1,6 @@
+2019-09-25 19:19:00,859 - INFO - client - client run
+2019-09-25 19:19:00,859 - INFO - client - client sent data
+2019-09-25 19:19:00,861 - INFO - client - server sent data{"action": "echo", "time": 1569428340.860986, "code": 200, "data": null}
+2019-09-25 19:43:38,348 - INFO - client - client run
+2019-09-25 19:43:38,348 - INFO - client - client sent data
+2019-09-25 19:43:38,350 - INFO - client - server sent data{"action": "echo", "time": 1569429818.350128, "code": 200, "data": null}
