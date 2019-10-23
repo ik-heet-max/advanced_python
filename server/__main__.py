@@ -4,6 +4,8 @@ from argparse import ArgumentParser
 import json
 from protocol import validate_request, make_response
 from actions import resolve
+from log import server_log_config
+
 
 parser = ArgumentParser()
 
@@ -25,6 +27,8 @@ if args.config:
         file_config = yaml.load(file, Loader=yaml.Loader)
         config.update(file_config)
 
+logger = server_log_config.logger
+
 host, port = config.get('host'), config.get('port')
 
 try:
@@ -32,11 +36,13 @@ try:
     sock.bind((host, port))
     sock.listen(5)
     
+    logger.info("Socket run with {}:{}".format(host, port))
     print("Socket run with {}:{}".format(host, port))
 
     while True:
         client, address = sock.accept()
         print("Client {} detected {}:{}".format(client, address[0], address[1]))
+        logger.info("Client {} detected {}:{}".format(client, address[0], address[1]))
 
         b_request = client.recv(config.get('buffersize'))
         request = json.loads(b_request.decode())
@@ -46,15 +52,19 @@ try:
             if controller:
                 try:
                     print('client has sent data {}'.format(request))
+                    logger.info('client has sent data {}'.format(request))
                     response = controller(request)
                 except Exception as err:
-                    print('Internal server error: {}'.format(err))
+                    print('Internal server error: {}'.format(err)) 
+                    logger.critical('Internal server error: {}'.format(err))
                     response = make_response(request, 500, data='Internal server error')
             else:
                 print('Controller {} does not exist'.format(actions_name))
+                logger.error('Controller {} does not exist'.format(actions_name))
                 response = make_response(request, 404, 'Action not found')
         else:
             print('Client has sent an invalid request {}'.format(request))
+            logger.error('Client has sent an invalid request {}'.format(request))
             response = make_response(request, 404, 'Wrong request')
         str_response = json.dumps(response)
         client.send(str_response.encode())
@@ -63,3 +73,4 @@ try:
         client.close()
 except KeyboardInterrupt:
     print("server shutdown")
+    logger.info("server shutdown")

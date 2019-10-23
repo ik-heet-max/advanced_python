@@ -5,6 +5,8 @@ import socket
 from argparse import ArgumentParser
 import json
 from datetime import datetime
+from server.log import client_log_config
+
 
 parser = ArgumentParser()
 parser.add_argument('-i', '--ip', default='localhost')
@@ -16,10 +18,13 @@ args = parser.parse_args()
 host = args.ip
 port = args.port
 
+logger = client_log_config.logger
+
 try:
     sock = socket.socket()
     sock.connect((host, port))
     print('client run')
+    logger.info('client run')
 
     msg = {'action': args.action,
             'time': datetime.now().timestamp()
@@ -27,11 +32,14 @@ try:
     data = json.dumps(msg)
 
     sock.send(data.encode())
-    print('client set data')
+    print('client sent data')
+    logger.info('client sent data')
     b_response = sock.recv(1024)
     print('server sent data{}'.format(b_response.decode()))
+    logger.info('server sent data{}'.format(b_response.decode()))
 
 except KeyboardInterrupt:
-    print("client shutdown")
+    print('client shutdown')
+    logger.info("client shutdown")
 
 
